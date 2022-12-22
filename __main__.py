@@ -93,18 +93,21 @@ def main() -> None:
 
     st.sidebar.header("Clean-slate Rendering Demo")
     st.sidebar.write(
-        "This is a demo that showcases different ways of re-rendering an app in the case where a"
-        ' "state change" has occurred. The point is to showcase that we don\'t always want to have'
-        " UI elements linger on screen while the app is re-rendering."
+        "This is a demo that showcases two different ways of re-rendering an app in the case where"
+        " a **state change** has occurred. By **state change** we mean that the app was triggered"
+        " to render in a fundamentally different way than it had been. We're trying to illustrate"
+        " that we don't always want to have UI elements linger on screen while the app is"
+        " re-rendering."
     )
     clean_slate = st.sidebar.checkbox(label="Use Clean Slate Rendering")
 
     st.title("A Multi-State App")
     st.info(
-        "This is an app that allows the user to do multiple different things. A choice the user"
-        " makes early on in the flow will completely alter what is subsequently rendered. We"
-        ' illustrate this by the "App State" `selectbox` below. Try changing its value and observe'
-        " the re-rendering behaviour."
+        "This is an app that allows the user to do multiple fundamentally different things. A"
+        " choice the user makes early on in the flow will completely alter what is subsequently"
+        ' rendered. We illustrate this by the "App State" `selectbox` below. Try changing its value'
+        " and observe the re-rendering behaviour under the two different settings selectable in the"
+        " sidebar."
     )
     app_state = st.selectbox(
         label="App State",
@@ -116,23 +119,31 @@ def main() -> None:
     if clean_slate:
         dg = get_clean_rendering_container(app_state=app_state)
 
-        st.sidebar.info(
-            "On state change: Notice that previous UI elements get cleaned up early.\n\n✅ This is"
+        st.sidebar.success(
+            "On re-running the same state: UI elements are allowed to linger, like normal.\n\n On"
+            " state change: Notice that previous UI elements get cleaned up early.\n\n✅ This is"
             " desirable when we know up front that what is going to be rendered is fundamentally"
-            " different than what was rendered before."
+            " different from what was rendered before."
         )
         st.sidebar.warning(
             "⚠️ This re-rendering style is by no means default, and currently requires a lot of"
-            " heavy lifting, as can be seen in the source code of this app. Can we get a simpler"
-            " method for doing this?"
+            " heavy lifting by the developer, as can be seen in the [source"
+            " code](https://github.com/harahu/st-clean-slate-rendering) of this app.\n\nCan we get"
+            " a simpler method for doing this? Something like:"
+            " `st.experimental_wipe_old_ui_state()`\n\nWhere the call would send a message to the"
+            " frontend asking it to disregard (for this single re-run) any UI elements lingering"
+            " from the preceding render."
         )
     else:
         dg = default_slot.container()
 
         st.sidebar.error(
             "On state change: Notice that previous UI elements linger until they're replaced.\n\n❌"
-            " We really only want this when the UI components being rendered are a continuation of"
-            " what was displayed in the previous rendering."
+            " We really only want this behaviour when the UI components being rendered are a"
+            " continuation of what was displayed in the previous rendering. I.e. the new UI"
+            ' elements are "the same as" the old UI elements. The ugliness of this behaviour is'
+            " exacerbated in cases where re-running takes a long time, as that means the old UI"
+            " elements linger for longer."
         )
         st.sidebar.info("ℹ️ This is the default behaviour of Streamlit apps.")
 
