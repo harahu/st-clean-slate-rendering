@@ -36,9 +36,11 @@ def logo_state(dg: DeltaGenerator) -> None:
         # Pretend we're doing an expensive operation in order to increase
         # lingering time of old UI elements. Highlights the problem in a better way.
         time.sleep(0.3)
+        cols = dg.container().columns(spec=(1, 1, 1, 1, 1))
 
-        # Display streamlit logo
-        dg.image(STREAMLIT_LOGO, width=100)
+        # Display streamlit logos
+        for col in cols:
+            col.image(STREAMLIT_LOGO, width=100)
 
 
 def text_state(dg: DeltaGenerator) -> None:
@@ -53,11 +55,14 @@ def text_state(dg: DeltaGenerator) -> None:
 def button_state(dg: DeltaGenerator) -> None:
     # Pretend we're doing an expensive operation in order to increase
     # lingering time of old UI elements. Highlights the problem in a better way.
-    time.sleep(1)
+    with dg:
+        with st.spinner("Doing hard work..."):
+            time.sleep(3)
 
     dg.button("Foo")
     dg.button("Bar")
     dg.button("Baz")
+    dg.button("Foobar")
 
 
 def get_clean_rendering_container(app_state: str) -> DeltaGenerator:
@@ -80,10 +85,17 @@ def get_clean_rendering_container(app_state: str) -> DeltaGenerator:
 
 
 def main() -> None:
-    st.sidebar.header("Clean Slate Rendering Demo")
+    st.set_page_config(
+        page_title="Clean-slate Rendering",
+        page_icon="🔁",
+        initial_sidebar_state="expanded",
+    )
+
+    st.sidebar.header("Clean-slate Rendering Demo")
     st.sidebar.write(
         "This is a demo that showcases different ways of re-rendering an app in the case where a"
-        ' "state change" has occurred.'
+        ' "state change" has occurred. The point is to showcase that we don\'t always want to have'
+        " UI elements linger on screen while the app is re-rendering."
     )
     clean_slate = st.sidebar.checkbox(label="Use Clean Slate Rendering")
 
@@ -91,7 +103,7 @@ def main() -> None:
     st.info(
         "This is an app that allows the user to do multiple different things. A choice the user"
         " makes early on in the flow will completely alter what is subsequently rendered. We"
-        ' illustrate this by the "App State" selectbox below. Try changing its value and observe'
+        ' illustrate this by the "App State" `selectbox` below. Try changing its value and observe'
         " the re-rendering behaviour."
     )
     app_state = st.selectbox(
@@ -103,18 +115,26 @@ def main() -> None:
 
     if clean_slate:
         dg = get_clean_rendering_container(app_state=app_state)
+
         st.sidebar.info(
             "On state change: Notice that previous UI elements get cleaned up early.\n\n✅ This is"
             " desirable when we know up front that what is going to be rendered is fundamentally"
             " different than what was rendered before."
         )
+        st.sidebar.warning(
+            "⚠️ This re-rendering style is by no means default, and currently requires a lot of"
+            " heavy lifting, as can be seen in the source code of this app. Can we get a simpler"
+            " method for doing this?"
+        )
     else:
         dg = default_slot.container()
+
         st.sidebar.error(
             "On state change: Notice that previous UI elements linger until they're replaced.\n\n❌"
             " We really only want this when the UI components being rendered are a continuation of"
             " what was displayed in the previous rendering."
         )
+        st.sidebar.info("ℹ️ This is the default behaviour of Streamlit apps.")
 
     if app_state == "Logo State":
         logo_state(dg=dg)
