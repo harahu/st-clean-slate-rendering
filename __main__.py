@@ -92,6 +92,7 @@ def main() -> None:
     )
 
     st.sidebar.header("Clean-slate Rendering Demo")
+    st.sidebar.caption("As requested in https://github.com/streamlit/streamlit/issues/6063")
     st.sidebar.write(
         "This is a demo that showcases two different ways of re-rendering an app in the case where"
         " a **state change** has occurred. By **state change** we mean that the app was triggered"
